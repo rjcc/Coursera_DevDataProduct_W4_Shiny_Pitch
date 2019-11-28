@@ -1,0 +1,95 @@
+Shiny Demo: Kaggle Heart Data UCI EDA K-means Cluster
+========================================================
+author: Robert J. Chen, MD, MPH (rjchen@post.harvard.edu)
+date:   11/27/2019
+autosize: true
+
+Introduction
+========================================================
+
+[https://rjcc.shinyapps.io/UCI_Heart_EDA_KM/](https://rjcc.shinyapps.io/UCI_Heart_EDA_KM/)
+#### It is a Shiny Demo of K-means clustering EDA of Kaggle Heart Data UCI.
+[https://www.kaggle.com/ronitf/heart-disease-uci](https://www.kaggle.com/ronitf/heart-disease-uci)
+#### We use a subset of the dataset that only include scale variables:
+##### 1. age;
+##### 2. trestbps (resting blood pressure);
+##### 3. chol (serum cholesterol in mg/dl);
+##### 4. thalach (maximum heart rate);
+##### 5. oldpeak (exercise-inducec ST depression).
+
+Ui.R With Codes
+========================================================
+
+[https://github.com/rjcc/Coursera_DevDataProduct_W4_Shiny_Pitch](https://github.com/rjcc/Coursera_DevDataProduct_W4_Shiny_Pitch)
+
+```{r, eval=FALSE}
+heartdata<-read.csv("heart_lab.csv")
+fluidPage(
+  headerPanel('Kaggle UCI Heart Data Exploratory Data Analysis'),
+  sidebarPanel(
+	h4('Select variables X, Y, and the cluster count k'),  
+    selectInput('xcol', 'Variable X', names(heartdata)),
+    selectInput('ycol', 'Variable Y', names(heartdata),
+                selected=names(heartdata)[[2]]),
+    numericInput('clusters', 'Cluster count k', 3,
+                 min = 1, max = 9),
+	  h4('Data source:'),
+	  tags$a(href='https://www.kaggle.com/ronitf/heart-disease-uci','https://www.kaggle.com/ronitf/heart-disease-uci'),
+	  h4('Subset variables:'),
+	  h5('1. age'),
+	  h5('2. trestbps (resting blood pressure)'),
+	  h5('3. chol (serum cholesterol in mg/dl)'),
+	  h5('4. thalach (maximum heart rate)'),
+	  h5('5. oldpeak (exercise-inducec ST depression)'),
+  
+  ),
+  mainPanel(
+    h2('K-means Clustering'),
+    plotOutput('plot1'),
+    h4('11/29/2019'),
+    h4('By Dr. Robert J Chen (rjchen@post.harvard.edu)'),
+    h4('More EDA:'),
+    tags$a(href='http://rpubs.com/rjcc/plotly_rjcc2','http://rpubs.com/rjcc/plotly_rjcc2'),
+  )
+)
+```
+
+Server.R With Codes
+========================================================
+
+https://github.com/rjcc/Coursera_DevDataProduct_W4_Shiny_Pitch
+
+```{r, eval=FALSE}
+library(shiny)
+library(datasets)
+heartdata<-read.csv("heart_lab.csv")
+
+function(input, output, session) {
+  # Combine the selected variables into a new data frame
+  selectedData <- reactive({
+    heartdata[, c(input$xcol, input$ycol)]
+  })
+
+  clusters <- reactive({
+    kmeans(selectedData(), input$clusters)
+  })
+
+  output$plot1 <- renderPlot({
+    palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+      "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
+
+    par(mar = c(5.1, 4.1, 0, 1))
+    plot(selectedData(),
+         col = clusters()$cluster,
+         pch = 20, cex = 3)
+    points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+
+}
+```
+
+Online Plotting
+========================================================
+
+[https://rjcc.shinyapps.io/UCI_Heart_EDA_KM/] (https://rjcc.shinyapps.io/UCI_Heart_EDA_KM/)
+
